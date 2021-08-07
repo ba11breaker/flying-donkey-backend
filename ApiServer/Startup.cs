@@ -10,6 +10,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using ApiServer.Models;
+using ApiServer.Services;
+
 
 namespace ApiServer
 {
@@ -25,6 +29,23 @@ namespace ApiServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // config MongoDb Atlas Connection
+            services.Configure<DatabaseSettings>(
+                Configuration.GetSection(nameof(DatabaseSettings))
+            );
+            services.AddSingleton<IDatabaseSettings>(sp => sp.GetRequiredService<IOptions<DatabaseSettings>>().Value);
+
+            // config AWS S3 Connection
+            services.Configure<AWSS3Settings>(
+                Configuration.GetSection(nameof(AWSS3Settings))
+            );
+            services.AddSingleton<IAWSS3Settings>(sp => sp.GetRequiredService<IOptions<AWSS3Settings>>().Value);
+
+            // Inject UserService
+            services.AddSingleton<UserService>();
+            // Inject FileService
+            services.AddSingleton<FileService>();
+
             services.AddControllers();
         }
 
