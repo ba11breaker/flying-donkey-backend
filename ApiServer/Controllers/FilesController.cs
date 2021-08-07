@@ -29,18 +29,28 @@ namespace ApiServer.Controller
         [HttpGet]
         public List<File> Get() => _fileService.GetFiles();
 
+        [HttpGet("filter")]
+        public List<File> Filter([FromQuery] string type, [FromQuery] string name) {
+            return _fileService.FilterFiles(type, name);
+        }
+
         [HttpPost("upload")]
-        public async Task<IActionResult> Upload()
+        public async Task<IActionResult> Upload([FromForm]Int64 allowedSize, [FromForm]string allowedType, IFormFile file)
         {
             try {
-                if (!Request.HasFormContentType) {
-                    System.Console.WriteLine("No file");
-                    return  StatusCode(500, new {message = "No file"});
+                if (file == null) {
+                    return StatusCode(400, new{message = "No file."});
                 }
-                var file = Request.Form.Files[0];
-                var allowedSize = Request.Form["allowedSize"];
-                System.Console.WriteLine(allowedSize);
-                var res = await _fileService.UploadFile(file);
+                if (allowedSize == 0) {
+                    return StatusCode(400, new{message = "No allowedSize."});
+                }
+                if (allowedType == null) {
+                    return StatusCode(400, new{message = "No allowedType."});
+                }
+                if (!_fileService.checkType(allowedType)) {
+                    return StatusCode(400, new{message = "Invalid File Type"});
+                }   
+                var res = await _fileService.UploadFile(file, allowedSize, allowedType);
                 if (res.success) {
                     return StatusCode(200, res);
                 }
@@ -48,7 +58,7 @@ namespace ApiServer.Controller
             }catch(Exception e) 
             {
                 System.Console.Write(e);
-                return StatusCode(500, e);
+                return StatusCode(500, new {message = e});
             }
         }
 

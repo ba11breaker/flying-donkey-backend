@@ -1,5 +1,6 @@
 using ApiServer.Models;
 using MongoDB.Driver;
+using MongoDB.Bson;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
@@ -36,6 +37,17 @@ namespace ApiServer.Services
         public List<File> GetFiles() => _files.Find(GetFiles => true).ToList();
         public File GetFile(string id) => _files.Find<File>(file => file.Id == id).FirstOrDefault();
 
+        public List<File> SearchFilesByName(string name) {   
+            return _files.Find(file => file.OriginalName.Contains(name)).ToList();
+        }
+
+        public List<File> FilterFiles (string type, string name) {
+            var filter = Builders<BsonDocument>.Filter;
+            
+            
+            return _files.Find(file => file.GeneralType==type & file.OriginalName.Contains(name==null?"":name)).ToList();
+        }
+
         public File Create(File file)
         {
             _files.InsertOne(file);
@@ -55,18 +67,30 @@ namespace ApiServer.Services
         }
 
         // Upload files to AWS S3
-        public async Task<UploadResult> UploadFile(IFormFile file)
+        public async Task<UploadResult> UploadFile(IFormFile file, Int64 allowedSize, string allowedType)
         {
             try {
                 string fileName = file.FileName;
                 string type = file.ContentType;
                 Int64 size = file.Length;
-                if (!validateType(type)) {
-                    throw new Exception($"Invalid Content Type {type}");
+                if (getGeneralType(type) != allowedType) {
+                    return new UploadResult{
+                        success = false,
+                        message = $"{fileName} is a {type} file, not consistent with the {allowedType}!"
+                    };
                 }
-                System.Console.WriteLine(type);
-                System.Console.WriteLine(size);
-                System.Console.WriteLine(DateTime.Now);
+                if (!validateType(type)) {
+                    return new UploadResult{
+                        success = false,
+                        message = $"{getGeneralType(type)} is an invalid type!"
+                    };
+                }
+                if (size > allowedSize) {
+                    return new UploadResult{
+                        success = false,
+                        message = $"The size of {fileName} is {size} bytes, more than {allowedSize} bytes!"
+                    };
+                }
                 string filePath = $"{type}/{DateTime.Now.Ticks}_{file.FileName}";
                 using (IO.Stream fileUpload = file.OpenReadStream())
                 {
@@ -88,7 +112,7 @@ namespace ApiServer.Services
                         Type = type,
                         GeneralType = getGeneralType(type),
                         Size = size,
-                        TimeStamp = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss fff")
+                        TimeStamp = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss ffff")
                     };
                     Create(newFile);
                     return new UploadResult{
@@ -104,6 +128,12 @@ namespace ApiServer.Services
                     message = e.ToString()
                 };
             }
+        }
+
+        // check whether the general type is valid
+        public bool checkType(string contentType)
+        {
+            return _generalTypes.ContainsKey(contentType);
         }
 
         // check Content Type

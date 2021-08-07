@@ -10,6 +10,7 @@ namespace ApiServer.Models{
             types.Add("image", "image");
             types.Add("audio", "audio");
             types.Add("application", "application");
+            types.Add("video", "video");
         }
     }
 }
