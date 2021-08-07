@@ -29,6 +29,17 @@ namespace ApiServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // config  CORS
+            services.AddCors(options => {options.AddDefaultPolicy(corsbuilder => {
+                    var corsPath = Configuration.GetSection("CorsPaths").GetChildren().Select(p => p.Value).ToArray();
+                    corsbuilder
+                    .WithOrigins(corsPath)
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials();
+                }); 
+            });
+
             // config MongoDb Atlas Connection
             services.Configure<DatabaseSettings>(
                 Configuration.GetSection(nameof(DatabaseSettings))
@@ -60,6 +71,8 @@ namespace ApiServer
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors();
 
             app.UseAuthorization();
 
