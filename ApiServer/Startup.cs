@@ -67,12 +67,13 @@ namespace ApiServer
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            app.UseHttpsRedirection();
+            
 
             app.UseRouting();
 
             app.UseCors();
+
+            app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
