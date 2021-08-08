@@ -76,7 +76,7 @@ namespace ApiServer.Services
                 if (getGeneralType(type) != allowedType) {
                     return new UploadResult{
                         success = false,
-                        message = $"{fileName} is a {type} file, not consistent with the {allowedType}!"
+                        message = $"{fileName} is {type}, not consistent with {allowedType}. Please choose {getGeneralType(type)} type!"
                     };
                 }
                 if (!validateType(type)) {
@@ -88,7 +88,7 @@ namespace ApiServer.Services
                 if (size > allowedSize) {
                     return new UploadResult{
                         success = false,
-                        message = $"The size of {fileName} is {size} bytes, more than {allowedSize} bytes!"
+                        message = $"The size of {fileName} is {this.sizeFormatter(size)} bytes, more than {this.sizeFormatter(allowedSize)} bytes!"
                     };
                 }
                 string filePath = $"{type}/{DateTime.Now.Ticks}_{file.FileName}";
@@ -117,7 +117,7 @@ namespace ApiServer.Services
                     Create(newFile);
                     return new UploadResult{
                         success = true,
-                        message = "Created a new file successfully!",
+                        message = $"upload a new file {fileName} successfully!",
                         file = newFile
                     };
                 }
@@ -148,6 +148,18 @@ namespace ApiServer.Services
         {
             string[] types = contentType.Split('/');
             return types[0];
+        }
+
+        // private file size formatter
+        private string sizeFormatter(Int64 _size) {
+            decimal size = (decimal)_size;
+            if (size < 1024) {
+                return $"{_size} bytes";
+            }
+            if (size < 1048576) {
+                return $"{Math.Round(size/1024, 2)} KB";
+            }
+            return $"{Math.Round(size/1048576, 2)} MB";
         }
     }
 

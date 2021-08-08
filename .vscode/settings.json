@@ -1,0 +1,5 @@
+{
+    "appService.preDeployTask": "publish-release",
+    "appService.deploySubpath": "ApiServer\\bin\\Release\\netcoreapp3.1\\publish",
+    "appService.defaultWebAppToDeploy": "/subscriptions/c6cd1ee0-6e5b-4065-be9e-dfdabb42b426/resourceGroups/appsvc_windows_centralus/providers/Microsoft.Web/sites/flying-donkey-test-api"
+}
