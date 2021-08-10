@@ -37,10 +37,6 @@ namespace ApiServer.Services
         public List<File> GetFiles() => _files.Find(GetFiles => true).ToList();
         public File GetFile(string id) => _files.Find<File>(file => file.Id == id).FirstOrDefault();
 
-        public List<File> SearchFilesByName(string name) {   
-            return _files.Find(file => file.OriginalName.Contains(name)).ToList();
-        }
-
         public List<File> FilterFiles (string type, string name) {
             var filter = Builders<BsonDocument>.Filter;
             
