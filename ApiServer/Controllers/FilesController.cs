@@ -35,7 +35,7 @@ namespace ApiServer.Controller
         }
 
         [HttpPost("upload")]
-        public async Task<IActionResult> Upload([FromForm]Int64 allowedSize, [FromForm]string allowedType, IFormFile file)
+        public async Task<IActionResult> Upload([FromForm]Int64 allowedSize, [FromForm]string allowedType, [FromForm]string time, IFormFile file)
         {
             try {
                 if (file == null) {
@@ -47,10 +47,13 @@ namespace ApiServer.Controller
                 if (allowedType == null) {
                     return StatusCode(400, new{message = "No allowedType."});
                 }
+                if (time == null) {
+                    return StatusCode(400, new{message = "No time."});
+                }
                 if (!_fileService.checkType(allowedType)) {
                     return StatusCode(400, new{message = "Invalid File Type"});
                 }   
-                var res = await _fileService.UploadFile(file, allowedSize, allowedType);
+                var res = await _fileService.UploadFile(file, allowedSize, allowedType, time);
                 if (res.success) {
                     return StatusCode(200, res);
                 }

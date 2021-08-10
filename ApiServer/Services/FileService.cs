@@ -67,7 +67,7 @@ namespace ApiServer.Services
         }
 
         // Upload files to AWS S3
-        public async Task<UploadResult> UploadFile(IFormFile file, Int64 allowedSize, string allowedType)
+        public async Task<UploadResult> UploadFile(IFormFile file, Int64 allowedSize, string allowedType, string time)
         {
             try {
                 string fileName = file.FileName;
@@ -112,7 +112,7 @@ namespace ApiServer.Services
                         Type = type,
                         GeneralType = getGeneralType(type),
                         Size = size,
-                        TimeStamp = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss ffff")
+                        TimeStamp = time
                     };
                     Create(newFile);
                     return new UploadResult{
