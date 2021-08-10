@@ -52,8 +52,6 @@ namespace ApiServer
             );
             services.AddSingleton<IAWSS3Settings>(sp => sp.GetRequiredService<IOptions<AWSS3Settings>>().Value);
 
-            // Inject UserService
-            services.AddSingleton<UserService>();
             // Inject FileService
             services.AddSingleton<FileService>();
 
